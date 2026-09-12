@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Bell,
   Calculator,
@@ -33,25 +33,99 @@ const navItems: NavItem[] = [
 ]
 
 const headings: Record<string, { title: string; subtitle: string }> = {
-  dashboard: { title: "My Dashboard", subtitle: "Discover government schemes you may be eligible for." },
-  find: { title: "Find Schemes", subtitle: "Describe your need and let AI rank the best matches." },
-  schemes: { title: "My Schemes", subtitle: "Schemes matched and saved to your profile." },
-  applications: { title: "My Applications", subtitle: "Track the status of your submissions." },
-  emi: { title: "EMI Calculator", subtitle: "Plan repayments using scheme-specific terms." },
-  profile: { title: "My Profile", subtitle: "Manage your personal details and documents." },
-  notifications: { title: "Notifications", subtitle: "Updates on your schemes and applications." },
+  dashboard: {
+    title: "My Dashboard",
+    subtitle: "Discover government schemes you may be eligible for.",
+  },
+  find: {
+    title: "Find Schemes",
+    subtitle: "Describe your need and let AI rank the best matches.",
+  },
+  schemes: {
+    title: "My Schemes",
+    subtitle: "Schemes matched and saved to your profile.",
+  },
+  applications: {
+    title: "My Applications",
+    subtitle: "Track the status of your submissions.",
+  },
+  emi: {
+    title: "EMI Calculator",
+    subtitle: "Plan repayments using scheme-specific terms.",
+  },
+  profile: {
+    title: "My Profile",
+    subtitle: "Manage your personal details and documents.",
+  },
+  notifications: {
+    title: "Notifications",
+    subtitle: "Updates on your schemes and applications.",
+  },
 }
 
 const notifications = [
-  { title: "PM Awas Yojana approved", detail: "Your application APP-10482 has been approved.", time: "2h ago", tone: "success" },
-  { title: "Document required", detail: "Upload your Caste Certificate to proceed with PMEGP.", time: "1d ago", tone: "warning" },
-  { title: "New scheme match", detail: "MUDRA Loan is a 90% match for your profile.", time: "2d ago", tone: "info" },
-  { title: "Application under review", detail: "PM-KISAN APP-10472 is being reviewed.", time: "3d ago", tone: "info" },
+  {
+    title: "PM Awas Yojana approved",
+    detail: "Your application APP-10482 has been approved.",
+    time: "2h ago",
+    tone: "success",
+  },
+  {
+    title: "Document required",
+    detail: "Upload your Caste Certificate to proceed with PMEGP.",
+    time: "1d ago",
+    tone: "warning",
+  },
+  {
+    title: "New scheme match",
+    detail: "MUDRA Loan is a 90% match for your profile.",
+    time: "2d ago",
+    tone: "info",
+  },
+  {
+    title: "Application under review",
+    detail: "PM-KISAN APP-10472 is being reviewed.",
+    time: "3d ago",
+    tone: "info",
+  },
 ]
 
 export default function CitizenDashboard() {
   const [active, setActive] = useState("dashboard")
   const [selected, setSelected] = useState<Scheme | null>(null)
+
+  // Logged-in user
+  const [user, setUser] = useState({
+    name: "User",
+    role: "Citizen",
+    initials: "U",
+  })
+
+  // Get logged-in user from localStorage
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user")
+
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser)
+
+        const name = parsedUser.name || "User"
+
+        setUser({
+          name,
+          role: parsedUser.role || "Citizen",
+          initials: name
+            .split(" ")
+            .map((n: string) => n[0])
+            .join("")
+            .toUpperCase(),
+        })
+      } catch (error) {
+        console.error("Failed to load user:", error)
+      }
+    }
+  }, [])
+
   const h = headings[active]
 
   return (
@@ -63,23 +137,34 @@ export default function CitizenDashboard() {
         onNavigate={setActive}
         title={h.title}
         subtitle={h.subtitle}
-        user={{ name: "Rahul Kumar", role: "Citizen", initials: "RK" }}
+        user={user}
       >
         {active === "dashboard" && (
-          <CitizenOverview onView={setSelected} onFind={() => setActive("find")} />
+          <CitizenOverview
+            onView={setSelected}
+            onFind={() => setActive("find")}
+          />
         )}
 
-        {active === "find" && <FindSchemes onView={setSelected} />}
+        {active === "find" && (
+          <FindSchemes onView={setSelected} />
+        )}
 
         {active === "schemes" && (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {schemes.map((s) => (
-              <SchemeCard key={s.id} scheme={s} onView={setSelected} />
+              <SchemeCard
+                key={s.id}
+                scheme={s}
+                onView={setSelected}
+              />
             ))}
           </div>
         )}
 
-        {active === "applications" && <ApplicationsPanel />}
+        {active === "applications" && (
+          <ApplicationsPanel />
+        )}
 
         {active === "emi" && (
           <div className="max-w-3xl">
@@ -87,12 +172,17 @@ export default function CitizenDashboard() {
           </div>
         )}
 
-        {active === "profile" && <ProfilePanel />}
+        {active === "profile" && (
+          <ProfilePanel />
+        )}
 
         {active === "notifications" && (
           <div className="mx-auto max-w-2xl space-y-3">
             {notifications.map((n) => (
-              <div key={n.title} className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
+              <div
+                key={n.title}
+                className="flex items-start gap-3 rounded-xl border border-border bg-card p-4"
+              >
                 <span
                   className={`mt-1 size-2.5 shrink-0 rounded-full ${
                     n.tone === "success"
@@ -102,12 +192,21 @@ export default function CitizenDashboard() {
                         : "bg-info"
                   }`}
                 />
+
                 <div className="flex-1">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-medium">{n.title}</p>
-                    <span className="text-xs text-muted-foreground">{n.time}</span>
+                    <p className="text-sm font-medium">
+                      {n.title}
+                    </p>
+
+                    <span className="text-xs text-muted-foreground">
+                      {n.time}
+                    </span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{n.detail}</p>
+
+                  <p className="text-sm text-muted-foreground">
+                    {n.detail}
+                  </p>
                 </div>
               </div>
             ))}
@@ -115,7 +214,11 @@ export default function CitizenDashboard() {
         )}
       </DashboardShell>
 
-      <SchemeDetailDialog scheme={selected} onOpenChange={(v) => !v && setSelected(null)} />
+      <SchemeDetailDialog
+        scheme={selected}
+        onOpenChange={(v) => !v && setSelected(null)}
+      />
+
       <AiAssistant />
     </>
   )
