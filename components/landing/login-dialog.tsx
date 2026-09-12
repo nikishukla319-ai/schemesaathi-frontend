@@ -53,11 +53,13 @@ export function LoginDialog({
     setError("")
 
     try {
-      const endpoint =
-        mode === "signup"
-          ? "http://localhost:5000/api/auth/signup"
-          : "http://localhost:5000/api/auth/login"
+      const API_URL =
+  "https://schemesaathi-backend-s2l1.onrender.com"
 
+const endpoint =
+  mode === "signup"
+    ? `${API_URL}/api/auth/signup`
+    : `${API_URL}/api/auth/login`
       const body =
         mode === "signup"
           ? {
@@ -114,6 +116,7 @@ export function LoginDialog({
         error instanceof Error
           ? error.message
           : "Something went wrong"
+          
       )
     } finally {
       setLoading(false)
