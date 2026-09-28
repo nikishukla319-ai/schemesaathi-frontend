@@ -15,8 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { EmiCalculator } from "@/components/emi-calculator"
 
-const API_URL = "https://schemesaathi-backend-s2l1.onrender.com"
-
+const API_URL = "http://localhost:5000"
 export function SchemeDetailDialog({
   scheme,
   onOpenChange,
@@ -56,7 +55,12 @@ export function SchemeDetailDialog({
     }
 
     const storedUser = localStorage.getItem("user")
+    const token = localStorage.getItem("token")
 
+if (!token) {
+  toast.error("Please login again")
+  return
+}
     if (!storedUser) {
       toast.error("Please login first")
       return
@@ -80,10 +84,11 @@ export function SchemeDetailDialog({
       setIsSubmitting(true)
 
       const response = await fetch(`${API_URL}/api/applications`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  },
         body: JSON.stringify({
           userId: user.id,
           applicantName: applicantName.trim(),
